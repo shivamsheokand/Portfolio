@@ -8,23 +8,37 @@ function Projects() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  //  const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Fetch projects from the API
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch("https://pro.aicoders.in/projects");
+        const response = await fetch("https://api.aicoders.in/getProjects.php");
         const data = await response.json();
-        setProjects(data);
+        // Ensure that only the 'data' array is assigned to 'projects'
+        if (data.status === "success") {
+          setProjects(data.data); // Set 'data' (the array of projects)
+        } else {
+          setError("Failed to fetch projects");
+        }
       } catch (error) {
-        setError("Error fetching projects");
+        if (retryCount < 3) {
+          // Retry logic: Retry fetching data up to 3 times
+          setRetryCount(retryCount + 1);
+          setError("Error fetching projects. Retrying...");
+        } else {
+          setError("Failed to fetch projects after multiple attempts.");
+          setLoading(false);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchProjects();
-  }, []);
+  }, [retryCount]);
 
   if (loading) {
     // Show Preloader component when loading
@@ -32,8 +46,17 @@ function Projects() {
   }
 
   if (error) {
-    // Show error message if there is any
-    return <h1 className="minh">{error}</h1>;
+    return (
+      <div>
+        <h1 className="minh">{error}</h1>
+        {/* Retry button to manually retry fetching projects */}
+        {retryCount < 3 && (
+          <button onClick={() => setRetryCount(retryCount + 1)}>
+            Retry Loading Projects
+          </button>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -50,12 +73,12 @@ function Projects() {
           {projects.map((project) => (
             <Col md={4} className="project-card" key={project.id}>
               <ProjectCard
-                imgPath={project.image}
+                imgPath={`https://api.aicoders.in/${project.image}`} // Full path to image
                 isBlog={false}
                 title={project.title}
                 description={project.description}
-                ghLink={project.ghLink}
-                demoLink={project.demoLink}
+                ghLink={project.githublink}
+                demoLink={project.demolink}
               />
             </Col>
           ))}

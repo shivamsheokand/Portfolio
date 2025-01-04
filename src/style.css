@@ -509,6 +509,17 @@ button:focus {
   padding: 20px !important;
   opacity: 0.8 !important;
   border-radius: 10px !important;
+  height: 300px !important; /* Set a default height for smaller screens */
+  width: 100% !important; /* Ensure the image takes full width of the card */
+  object-fit: contain !important; /* Ensure the image covers the area without distortion */
+}
+
+/* Adjust for larger screen sizes (e.g., desktop) */
+@media (min-width: 1024px) {
+  .card-img-top {
+    height: 300px !important; /* Increase height for larger screens */
+    object-fit: contain !important; /* Ensures full image visibility */
+  }
 }
 
 .blog-img {
